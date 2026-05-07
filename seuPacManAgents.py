@@ -70,3 +70,29 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 return min(scores)
 
         return minimax(0, 0, gameState)
+
+def betterEvaluationFunction(currentGameState: GameState):
+    pos = currentGameState.getPacmanPosition()
+    food = currentGameState.getFood().asList()
+    ghostStates = currentGameState.getGhostStates()
+
+    # Calcula a distância de Manhattan para a comida mais próxima
+    foodDistances = [manhattanDistance(pos, f) for f in food]
+    if len(foodDistances) > 0:
+        minFoodDistance = min(foodDistances)
+    else:
+        minFoodDistance = 0
+
+    # Distância para o fantasma mais próximo
+    ghostDistances = [manhattanDistance(pos, ghost.getPosition()) for ghost in ghostStates]
+    minGhostDistance = min(ghostDistances)
+
+    # Aumenta a pontuação se o fantasma estiver assustado, mas penaliza se estiver muito perto
+    scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+    if min(scaredTimes) > 0:
+        minGhostDistance = 0  # Ignora fantasmas assustados
+
+    return currentGameState.getScore() - (1.5 / (minFoodDistance + 1)) + (2 / (minGhostDistance + 1))
+
+# Abbreviation
+better = betterEvaluationFunction
